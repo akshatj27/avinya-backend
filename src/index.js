@@ -23,7 +23,7 @@ app.use(express.json());
 
 app.get("/", (req, res) => {
   res.json({
-    message: "🦄🌈✨👋🌎🌍🌏✨🌈🦄",
+    message: "🦄🌈✨👋🌎🌍🌏✨",
   });
 });
 
@@ -41,10 +41,12 @@ app.post("/login", async (req, res) => {
   if (user) {
     res.json({
       message: "Successfully Logged In!",
+      success: true,
     });
   } else {
     res.status(401).json({
       message: "🔒",
+      success: false,
     });
   }
 });
@@ -62,17 +64,28 @@ const upload = multer({ storage: storage });
 
 app.post("/incident", upload.single("photo"), async (req, res) => {
   try {
-    const { description, location } = req.body;
+    let { description, locationX, locationY, userUploaded } = req.body;
+    console.log(req);
     const photoPath = req.file ? req.file.path : null;
-
+    userUploaded = !!userUploaded;
     const collection = db.collection("incidents");
     const incident = {
-      description,
-      location,
+      description: userUploaded ? description : "automated",
+      locationX,
+      locationY,
       photoPath,
       timestamp: new Date(),
+      userUploaded,
+      attended: false,
+      attendedBy: "",
+      attendedAt: new Date(),
     };
+    console.log(incident);
     // userUploaded, attended?, attendedBy, attendedAt
+
+    // processing
+    // ai call -> extract rating and description ->
+
     await collection.insertOne(incident);
 
     res.json({
